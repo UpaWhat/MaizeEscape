@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] private GameLogicController gc;
     [Header("Movement")]
 
     public float moveSpeed;
@@ -27,14 +28,22 @@ public class PlayerMovement : MonoBehaviour
 
     float horizontalInput;
     float verticalInput;
-
+    bool isStopped = true;
     Vector3 moveDirection;
 
     Rigidbody rb;
 
     private void Start()
     {
-        
+        isStopped = false;
+        try
+        {
+            gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicController>();
+        }
+        catch
+        {
+            Debug.Log("Could Not Find Game Controller");
+        }
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         readyToJump = true;
@@ -59,12 +68,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isStopped) return;
         MovePlayer();
     }
 
     private void Update()
     {
-
+        if (isStopped) return;
         //Ground Check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
@@ -98,9 +108,14 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
         }
+    }
 
-
-
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.CompareTag("Finish"))
+        {
+            gc.PlayerWin();
+        }
     }
 
     private void SpeedControl()
@@ -125,6 +140,13 @@ public class PlayerMovement : MonoBehaviour
     private void ResetJump()
     {
         readyToJump = true;
+    }
+
+    public void KillPlayer()
+    {
+        Debug.Log("Player Dead");
+        gc.PlayerDied();
+        isStopped = true;
     }
 
 }

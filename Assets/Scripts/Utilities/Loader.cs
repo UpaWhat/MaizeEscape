@@ -8,7 +8,7 @@ public static class Loader
 {
     public enum Scene
     {
-        Game, Loading, Credits,
+        Game, Loading, Credits, MainMenu,
     }
 
     private static Action onLoaderCallback;
